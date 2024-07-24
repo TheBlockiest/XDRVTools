@@ -4,10 +4,11 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 
 
 ## Installation:
-1. Locate the Notepad++ plugins folder. This can be done by selecting "Plugins" → "Open Plugins Folder..." in Notepad++ or by going to your program files and finding the Notepad++ folder.
-2. Paste the file `XDRVTools.dll` to Notepad++ `plugins\XDRVTools` folder.
-3. Restart Notepad++. The plugin should appear under the "Plugins" menu.
-4. Open an XDRV file and start using the suite of commands.
+1. Go to the "Releases" page of this repository. There, download and unzip the latest version of XDRVTools.
+2. Locate the Notepad++ plugins folder. This can be done by selecting "Plugins" → "Open Plugins Folder..." in Notepad++ or by going to your program files and finding the Notepad++ folder.
+3. Paste the file `XDRVTools.dll` to Notepad++ `plugins\XDRVTools` folder.
+4. Restart Notepad++. The plugin should appear under the "Plugins" menu.
+5. Open an XDRV file and start using the suite of commands.
 
 
 ## Planned Changes:
