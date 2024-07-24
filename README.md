@@ -1,5 +1,5 @@
 # XDRVTools for Notepad++
-XDRV Tools is a plugin for Notepad++ that makes directly editing .xdrv files as text easier and more efficient.
+XDRVTools is a plugin for Notepad++ that makes directly editing .xdrv files as text easier and more efficient.
 Current build is guaranteed to work on Windows systems, not yet tested for Linux or Mac.
 
 
@@ -10,13 +10,14 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 4. Open an XDRV file and start using the suite of commands.
 
 
-## WIP Changes:
+## Planned Changes:
 * Rework functions to perform text changes in one action (in order to work better with Undo/Redo commands.)
+* Make **Beat / Measure Navigator Dock**'s "Go to measure" function account for time signature changes, rather than assuming 4/4.
 
 
 ## Important Info:
 * For ease of use, XDRVTools will expand your selections to cover all of the contained lines or measures as relevant.
-* XDRVTools is only meant to be used with .xdrv files. Other rhythm game chart files may be incompatible with XDRVTools commands.
+* XDRVTools is only meant to be used with .xdrv files. The behavior of XDRVTools commands on other video chart files is unpredictable.
 
 
 ## Command List:
@@ -29,6 +30,6 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 6. **Mirror Events:** Mirrors events in all selected line. (Left → Right, Right → Left)
 7. **Mirror Both:** Mirrors both notes and events in the selected lines.
 ---
-8. **Beat / Measure Navigator Dock:** Creates a dock that allows you to easily find a specific beat/measure in the file.
+8. **Beat / Measure Navigator Dock:** Creates a dock that allows you to easily find a specific beat/measure in the file. (Currently assumes that your song is in 4/4.)
 9. **Select Lines**: Expands your current selection to cover the entirety of all contained lines.
 10. **Select Beats**: Expands your current selection to cover the entirety of all contained beats.
