@@ -23,6 +23,7 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 
 
 ## Command List:
+![](docs/command-list.png)
 1. **Write Empty Note:** Creates an empty note (000-000|00|0) directly at the selection.
 2. **Double Subdivisions:** Doubles the subdivisions of all selected beats.
 3. **Triple Subdivisions:** Triples the subdivisions of all selected beats.
