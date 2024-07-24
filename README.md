@@ -13,6 +13,7 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 ## Planned Changes:
 * Rework functions to perform text changes in one action (in order to work better with Undo/Redo commands.)
 * Make **Beat / Measure Navigator Dock**'s "Go to measure" function account for time signature changes, rather than assuming 4/4.
+* Additional changes / features as recommended by users!
 
 
 ## Important Info:
@@ -33,3 +34,5 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 8. **Beat / Measure Navigator Dock:** Creates a dock that allows you to easily find a specific beat/measure in the file. (Currently assumes that your song is in 4/4.)
 9. **Select Lines**: Expands your current selection to cover the entirety of all contained lines.
 10. **Select Beats**: Expands your current selection to cover the entirety of all contained beats.
+
+Special thanks to tari, riley, and all other contributors to EX-XDRiVER for making an incredible game with so much creative potential.
