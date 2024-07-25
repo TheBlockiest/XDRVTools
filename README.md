@@ -35,7 +35,9 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 7. **Mirror Both:** Mirrors both notes and events in the selected lines.
 ---
 8. **Beat / Measure Navigator Dock:** Creates a dock that allows you to easily find a specific beat/measure in the file. (Currently assumes that your song is in 4/4.)
-9. **Select Lines**: Expands your current selection to cover the entirety of all contained lines.
-10. **Select Beats**: Expands your current selection to cover the entirety of all contained beats.
+9. **Create Measure Markers:** Creates a special marker for every 4th beat
+10. **Select Lines**: Expands your current selection to cover the entirety of all contained lines.
+11. **Select Beats**: Expands your current selection to cover the entirety of all contained beats.
+![](docs/beat-measure-nav.png)
 
 Special thanks to tari, riley, and all other contributors to EX-XDRiVER for making an incredible game with so much creative potential.
