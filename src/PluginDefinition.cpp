@@ -117,8 +117,9 @@ void commandMenuInit()
     setCommand(8, TEXT("---"), NULL, NULL, false);
 
     setCommand(DOCKABLE_DEMO_INDEX, TEXT("Beat / Measure Navigator Dock"), dockableNav, NULL, false);
-    setCommand(10, TEXT("Select Lines"), selectLines, NULL, false);
-    setCommand(11, TEXT("Select Beats"), selectBeats, NULL, false);
+    setCommand(10, TEXT("Create Measure Markers"), createMeasureMarkers, NULL, false);
+    setCommand(11, TEXT("Select Lines"), selectLines, NULL, false);
+    setCommand(12, TEXT("Select Beats"), selectBeats, NULL, false);
 }
 
 //
@@ -487,4 +488,73 @@ void dockableNav()
         ::SendMessage(nppData._nppHandle, NPPM_DMMREGASDCKDLG, 0, (LPARAM)&data);
     }
     _navDock.display();
+}
+
+void deleteMeasureMarkers()
+{
+    HWND curScint = getScintilla();
+
+    int lineCount = (int)::SendMessage(curScint, SCI_GETLINECOUNT, 0, 0);
+
+    for (int i = 1; i <= lineCount; i++)
+    {
+        int lineLength = (int)::SendMessage(curScint, SCI_LINELENGTH, i, 0);
+        char* currentLine = new char[lineLength + 1];
+        ::SendMessage(curScint, SCI_GETLINE, i, reinterpret_cast<LPARAM>(currentLine));
+
+        if (currentLine[0] == 0)
+        {
+            continue;
+        }
+
+        if (currentLine[0] == '/' && currentLine[2] == '`' && currentLine[3] == 'B')
+        {
+            // Current line is a pre-existing beat marker, please delete
+            int nextLine = i + 1;
+            int start = (int)::SendMessage(curScint, SCI_POSITIONFROMLINE, i, 0);
+            int end = (int)::SendMessage(curScint, SCI_POSITIONFROMLINE, nextLine, 0);
+            int length = end - start;
+            ::SendMessage(curScint, SCI_DELETERANGE, start, length);
+
+            // Line count has changed, recalculate it!
+            lineCount -= 1;
+        }
+
+        delete[] currentLine;
+    }
+}
+
+void createMeasureMarkers()
+{
+    deleteMeasureMarkers();
+
+    HWND curScint = getScintilla();
+
+    int lineCount = (int)::SendMessage(curScint, SCI_GETLINECOUNT, 0, 0);
+
+    int currentBeat = -1;
+    for (int i = 1; i <= lineCount; i++)
+    {
+        int lineLength = (int)::SendMessage(curScint, SCI_LINELENGTH, i, 0);
+        char* currentLine = new char[lineLength + 1];
+        ::SendMessage(curScint, SCI_GETLINE, i, reinterpret_cast<LPARAM>(currentLine));
+
+        if (currentLine[0] == '-')
+        {
+            currentBeat += 1;
+            if (currentBeat % 4 == 0)
+            {
+                string str = "\n\
+//`B" + to_string(currentBeat);
+                const char* newMarker = str.c_str();
+                int pos = (int)::SendMessage(curScint, SCI_GETLINEENDPOSITION, i, 0);
+                ::SendMessage(curScint, SCI_INSERTTEXT, pos, (LPARAM)newMarker);
+
+                lineCount += 1;
+                i += 1;
+            }
+        }
+
+        delete[] currentLine;
+    }
 }

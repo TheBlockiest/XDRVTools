@@ -94,6 +94,16 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam
 					}
 					return TRUE;
 				}
+				case IDOK3:
+				{
+					createMeasureMarkers();
+					return TRUE;
+				}
+				case IDOK4:
+				{
+					deleteMeasureMarkers();
+					return TRUE;
+				}
 			}
 				return FALSE;
 		}
