@@ -42,7 +42,8 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 11. **Select Beats**: Expands your current selection to cover the entirety of all contained beats.
 ---
 12. **Generate Metadata**: Generates blank song metadata with some default values.
-13. **Smart Generate Metadata**: Generates song metadata with some default values AND data of the files in the same directory as your .xdrv file.
+--
+13. **Go To Chart-Documentation**: Goes to the official Github page for .xdrv documentation.
 
 ![](docs/beat-measure-nav.png)
 
