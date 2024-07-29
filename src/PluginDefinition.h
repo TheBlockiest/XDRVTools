@@ -38,7 +38,7 @@ const TCHAR NPP_PLUGIN_NAME[] = TEXT("XDRV Tools");
 //
 // Here define the number of your plugin commands
 //
-const int nbFunc = 13;
+const int nbFunc = 17;
 
 
 //
@@ -92,5 +92,8 @@ void mirrorBoth();
 void dockableNav();
 void deleteMeasureMarkers();
 void createMeasureMarkers();
+void metadata(bool smart);
+void generateMetadata();
+void goToDocs();
 
 #endif //PLUGINDEFINITION_H

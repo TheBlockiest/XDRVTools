@@ -31,6 +31,11 @@ using namespace std;
 DemoDlg _navDock;
 #define DOCKABLE_DEMO_INDEX 9
 
+struct metadataElement {
+    string name;
+    string defaultValue;
+};
+
 //
 // The plugin data that Notepad++ needs
 //
@@ -103,6 +108,18 @@ void commandMenuInit()
     mirrorEventKey->_isShift = false;
     mirrorEventKey->_key = 0x45;
 
+    ShortcutKey* navKey = new ShortcutKey; //Ctrl alt D
+    navKey->_isAlt = true;
+    navKey->_isCtrl = true;
+    navKey->_isShift = false;
+    navKey->_key = 0x44;
+
+    ShortcutKey* docKey = new ShortcutKey; //Ctrl alt /
+    docKey->_isAlt = true;
+    docKey->_isCtrl = true;
+    docKey->_isShift = false;
+    docKey->_key = 0xBF;
+
     setCommand(0, TEXT("Write Empty Note"), writeEmptyNote, emptyNoteKey, false);
     setCommand(1, TEXT("Double Subdivisions"), doubleSubdivisions, doubleSubdivKey, false);
     setCommand(2, TEXT("Triple Subdivisions"), tripleSubdivisions, tripleSubdivKey, false);
@@ -116,10 +133,18 @@ void commandMenuInit()
 
     setCommand(8, TEXT("---"), NULL, NULL, false);
 
-    setCommand(DOCKABLE_DEMO_INDEX, TEXT("Beat / Measure Navigator Dock"), dockableNav, NULL, false);
+    setCommand(DOCKABLE_DEMO_INDEX, TEXT("Beat / Measure Navigator Dock"), dockableNav, navKey, false);
     setCommand(10, TEXT("Create Measure Markers"), createMeasureMarkers, NULL, false);
     setCommand(11, TEXT("Select Lines"), selectLines, NULL, false);
     setCommand(12, TEXT("Select Beats"), selectBeats, NULL, false);
+
+    setCommand(13, TEXT("---"), NULL, NULL, false);
+
+    setCommand(14, TEXT("Generate Metadata"), generateMetadata, NULL, false);
+
+    setCommand(15, TEXT("---"), NULL, NULL, false);
+
+    setCommand(16, TEXT("Go To Chart-Documentation"), goToDocs, docKey, false);
 }
 
 //
@@ -127,12 +152,13 @@ void commandMenuInit()
 //
 void commandMenuCleanUp()
 {
-	// Don't forget to deallocate your shortcut here
     delete funcItem[0]._pShKey;
     delete funcItem[1]._pShKey;
     delete funcItem[2]._pShKey;
     delete funcItem[5]._pShKey;
     delete funcItem[6]._pShKey;
+    delete funcItem[9]._pShKey;
+    delete funcItem[16]._pShKey;
 }
 
 //
@@ -289,7 +315,7 @@ void multiplySubdivisions(int mult)
             continue;
         }
 
-        if (currentLine[3] == '-' && currentLine[7] == '|' && currentLine[10] == '|')
+        if (lineLength > 10 && currentLine[3] == '-' && currentLine[7] == '|' && currentLine[10] == '|')
         {
             // Add (mult - 1) empty notes after the corresponding note
             int pos = (int)::SendMessage(curScint, SCI_GETLINEENDPOSITION, i, 0);
@@ -413,7 +439,7 @@ void mirrorElements(string mirrorType)
         if (mirrorType == "notes")
         {
             // Check for three characters that indicate a line to be a note
-            if (currentLine[3] == '-' && currentLine[7] == '|' && currentLine[10] == '|')
+            if (lineLength > 10 && currentLine[3] == '-' && currentLine[7] == '|' && currentLine[10] == '|')
             {
                 // Bring into string format, reverse sections, concatenate, create reference
                 string newLine = mirrorNoteString(currentLine);
@@ -433,7 +459,7 @@ void mirrorElements(string mirrorType)
         }
         else
         {
-            if (currentLine[3] == '-' && currentLine[7] == '|' && currentLine[10] == '|')
+            if (lineLength > 10 && currentLine[3] == '-' && currentLine[7] == '|' && currentLine[10] == '|')
             {
                 string newLine = mirrorNoteString(currentLine);
                 const char* str = newLine.c_str();
@@ -507,7 +533,7 @@ void deleteMeasureMarkers()
             continue;
         }
 
-        if (currentLine[0] == '/' && currentLine[2] == '`' && currentLine[3] == 'B')
+        if (lineLength > 3 && currentLine[0] == '/' && currentLine[2] == '`' && currentLine[3] == 'B')
         {
             // Current line is a pre-existing beat marker, please delete
             int nextLine = i + 1;
@@ -522,6 +548,7 @@ void deleteMeasureMarkers()
 
         delete[] currentLine;
     }
+
 }
 
 void createMeasureMarkers()
@@ -533,19 +560,34 @@ void createMeasureMarkers()
     int lineCount = (int)::SendMessage(curScint, SCI_GETLINECOUNT, 0, 0);
 
     int currentBeat = -1;
+    int currentMeasure = 0;
+    int beatOfNextMeasure = 0;
+    int beatsPerMeasure = 4;
+    int measureIncrement = 1;
+    bool noteReadSinceMeasure = true;
     for (int i = 1; i <= lineCount; i++)
     {
         int lineLength = (int)::SendMessage(curScint, SCI_LINELENGTH, i, 0);
         char* currentLine = new char[lineLength + 1];
         ::SendMessage(curScint, SCI_GETLINE, i, reinterpret_cast<LPARAM>(currentLine));
 
+        if (currentLine[0] == 0)
+        {
+            continue;
+        }
+
         if (currentLine[0] == '-')
         {
             currentBeat += 1;
-            if (currentBeat % 4 == 0)
+
+            if (currentBeat == beatOfNextMeasure)
             {
+                currentMeasure += measureIncrement;
+                beatOfNextMeasure = currentBeat + beatsPerMeasure;
+                noteReadSinceMeasure = false;
+
                 string str = "\n\
-//`B" + to_string(currentBeat);
+//`B" + to_string(currentBeat) + ",M" + to_string(currentMeasure);
                 const char* newMarker = str.c_str();
                 int pos = (int)::SendMessage(curScint, SCI_GETLINEENDPOSITION, i, 0);
                 ::SendMessage(curScint, SCI_INSERTTEXT, pos, (LPARAM)newMarker);
@@ -554,7 +596,125 @@ void createMeasureMarkers()
                 i += 1;
             }
         }
+        else if (lineLength > 10 && currentLine[3] == '-' && currentLine[7] == '|' && currentLine[10] == '|')
+        {
+            noteReadSinceMeasure = true;
+        }
+        else if (lineLength > 6 && currentLine[0] == '#' && currentLine[1] == 'T' && currentLine[6] == 'S')
+        {
+            string str = currentLine;
+            size_t equalPos = str.find("=");
+            size_t commaPos = str.find(",");
+            size_t endPos = str.find("\n");
+            if (commaPos == string::npos || equalPos == string::npos || endPos == string::npos)
+            {
+                continue;
+            }
+
+            try
+            {
+                beatsPerMeasure = stoi(str.substr(equalPos + 1, commaPos - equalPos - 1));
+                measureIncrement = stoi(str.substr(commaPos + 1, endPos - commaPos - 1)) / 4;
+            }
+            catch (...)
+            {
+                ::SendMessage(curScint, SCI_ENSUREVISIBLE, i, 0);
+                ::SendMessage(curScint, SCI_GOTOLINE, i, 0);
+                ::MessageBox(nppData._nppHandle, TEXT("Malformed time signature event."), TEXT("Error"), MB_OK);
+                break;
+            }
+
+            if (!noteReadSinceMeasure)
+            {
+                beatOfNextMeasure = currentBeat + beatsPerMeasure;
+            }
+        }
 
         delete[] currentLine;
     }
+}
+
+void metadata(bool smart)
+{
+    HWND curScint = getScintilla();
+
+    metadataElement metadataDefaults[] = {
+        {"MUSIC_TITLE","Song Title"},
+        {"ALTERNATE_TITLE",""},
+        {"SUBTITLE",""},
+        {"MUSIC_ARTIST","Song Artist"},
+        {"MUSIC_CREDIT",""},
+        {"MUSIC_AUDIO","audio.ogg"},
+        {"MUSIC_PREVIEW_START","0"},
+        {"MUSIC_PREVIEW_LENGTH","10"},
+        {"MUSIC_VOLUME","1"},
+        {"MUSIC_OFFSET","0"},
+        {"JACKET_IMAGE","jacket.jpg"},
+        {"JACKET_ILLUSTRATOR","Jacket Illustrator"},
+        {"CHART_AUTHOR","Me"},
+        {"CHART_TAGS","0,0,0,0"},
+        {"CHART_BOSS","FALSE"},
+        {"CHART_DIFFICULTY","EXTREME"},
+        {"CHART_LEVEL","15"},
+        {"CHART_UNLOCK",""},
+        {"CHART_DISPLAY_BPM","120"},
+        {"CHART_BPM","120"},
+        {"FLASH_TRACK","FALSE"},
+        {"KEYBOARD_ONLY","FALSE"},
+        {"ORIGINAL","FALSE"},
+        {"MODFILE_PATH",""},
+        {"RPC_HIDDEN","FALSE"},
+        {"DISABLE_LEADERBOARD_UPLOADING","FALSE"},
+        {"STAGE_BACKGROUND","default"}
+    };
+
+    if (smart)
+    {
+        ::MessageBox(nppData._nppHandle, TEXT("Nothing here yet :("), TEXT("Sorry"), MB_OK);
+        // We will put some stuff in here, handling metadata gen first
+    }
+
+    // Find the first line, then delete all previous metadata lines
+    int lineCount = (int)::SendMessage(curScint, SCI_GETLINECOUNT, 0, 0);
+    int length = 0;
+    for (int i = 1; i <= lineCount; i++)
+    {
+        int lineLength = (int)::SendMessage(curScint, SCI_LINELENGTH, i, 0);
+        char* currentLine = new char[lineLength + 1];
+        ::SendMessage(curScint, SCI_GETLINE, i, reinterpret_cast<LPARAM>(currentLine));
+
+        if (currentLine[0] == '-')
+        {
+            length = (int)::SendMessage(curScint, SCI_POSITIONFROMLINE, i, 0);
+            delete[] currentLine;
+            break;
+        }
+
+        delete[] currentLine;
+    }
+
+    if (length > 0)
+    {
+        ::SendMessage(curScint, SCI_DELETERANGE, 0, length);
+    }
+    // Generate (sequentially) the metadata lines at the beginning of the code
+
+    int len = sizeof metadataDefaults / sizeof metadataDefaults[0] - 1;
+    for (int i = len; i >= 0; i--)
+    {
+        string str = metadataDefaults[i].name + "=" + metadataDefaults[i].defaultValue + "\n\
+";
+        const char* newMetadata = str.c_str();
+        ::SendMessage(curScint, SCI_INSERTTEXT, 0, (LPARAM)newMetadata);
+    }
+}
+
+void generateMetadata()
+{
+    metadata(false);
+}
+
+void goToDocs()
+{
+    ::ShellExecute(NULL, TEXT("open"), TEXT("https://github.com/EX-XDRiVER/Chart-Documentation"), NULL, NULL, SW_SHOWNORMAL);
 }

@@ -14,6 +14,7 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 ## Planned Changes:
 * Rework functions to perform text changes in one action (in order to work better with Undo/Redo commands.)
 * Make **Beat / Measure Navigator Dock**'s "Go to measure" function account for time signature changes, rather than assuming 4/4.
+* Make **Create Measure Markers** also follow time signature.
 * Additional changes / features as recommended by users!
 
 
@@ -21,6 +22,7 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 * For ease of use, XDRVTools will expand your selections to cover all of the contained lines or measures as relevant.
 * XDRVTools is only meant to be used with .xdrv files. The behavior of XDRVTools commands on other video chart files is unpredictable.
 * Caution should be exercised when mirroring hold notes and beats, as XDRVTools does not automatically mirror unselected note ends / starts.
+* Grave markers are used as an indicator for both event mirroring and beat markers. Therefore, it is highly advised that you avoid using grave markers in elements like checkpoints.
 
 
 ## Command List:
@@ -38,6 +40,9 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 9. **Create Measure Markers:** Creates a special marker for every 4th beat.
 10. **Select Lines**: Expands your current selection to cover the entirety of all contained lines.
 11. **Select Beats**: Expands your current selection to cover the entirety of all contained beats.
+---
+12. **Generate Metadata**: Generates blank song metadata with some default values.
+13. **Smart Generate Metadata**: Generates song metadata with some default values AND data of the files in the same directory as your .xdrv file.
 
 ![](docs/beat-measure-nav.png)
 

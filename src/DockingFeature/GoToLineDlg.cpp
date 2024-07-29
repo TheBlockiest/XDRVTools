@@ -22,6 +22,85 @@
 
 extern NppData nppData;
 
+void goToLineOfMeasure(HWND curScint, int measureGoal)
+{
+	int lineCount = (int)::SendMessage(curScint, SCI_GETLINECOUNT, 0, 0);
+
+	int currentBeat = -1;
+	int currentMeasure = 0;
+	int beatOfNextMeasure = 0;
+	int beatsPerMeasure = 4;
+	int measureIncrement = 1;
+	bool noteReadSinceMeasure = true;
+	for (int i = 1; i <= lineCount; i++)
+	{
+		int lineLength = (int)::SendMessage(curScint, SCI_LINELENGTH, i, 0);
+		char* currentLine = new char[lineLength + 1];
+		::SendMessage(curScint, SCI_GETLINE, i, reinterpret_cast<LPARAM>(currentLine));
+
+		if (i == lineCount)
+		{
+			::SendMessage(curScint, SCI_ENSUREVISIBLE, lineCount, 0);
+			::SendMessage(curScint, SCI_GOTOLINE, lineCount, 0);
+		}
+		else if (currentLine[0] == '-')
+		{
+			currentBeat += 1;
+			if (currentBeat == beatOfNextMeasure)
+			{
+				currentMeasure += measureIncrement;
+				beatOfNextMeasure = currentBeat + beatsPerMeasure;
+				noteReadSinceMeasure = false;
+
+				if (currentMeasure >= measureGoal)
+				{
+					int lineToGo = i + 1;
+					::SendMessage(curScint, SCI_ENSUREVISIBLE, lineToGo, 0);
+					::SendMessage(curScint, SCI_GOTOLINE, lineToGo, 0);
+					delete[] currentLine;
+					break;
+				}
+			}
+		}
+		else if (lineLength > 11 && currentLine[3] == '-' && currentLine[7] == '|' && currentLine[10] == '|')
+		{
+			noteReadSinceMeasure = true;
+		}
+		else if (lineLength > 7 && currentLine[0] == '#' && currentLine[1] == 'T' && currentLine[6] == 'S')
+		{
+			string str = currentLine;
+			size_t equalPos = str.find("=");
+			size_t commaPos = str.find(",");
+			size_t endPos = str.find("\n");
+			if (commaPos == string::npos || equalPos == string::npos || endPos == string::npos)
+			{
+				::MessageBox(nppData._nppHandle, TEXT("missing pos."), TEXT("debug"), MB_OK);
+				continue;
+			}
+
+			try
+			{
+				beatsPerMeasure = stoi(str.substr(equalPos + 1, commaPos - equalPos - 1));
+				measureIncrement = stoi(str.substr(commaPos + 1, endPos - commaPos - 1)) / 4;
+			}
+			catch (...)
+			{
+				::SendMessage(curScint, SCI_ENSUREVISIBLE, i, 0);
+				::SendMessage(curScint, SCI_GOTOLINE, i, 0);
+				::MessageBox(nppData._nppHandle, TEXT("Malformed time signature event."), TEXT("Error"), MB_OK);
+				break;
+			}
+
+			if (!noteReadSinceMeasure)
+			{
+				beatOfNextMeasure = currentBeat + beatsPerMeasure;
+			}
+		}
+
+		delete[] currentLine;
+	}
+}
+
 void goToLineOfBeat(HWND curScint, int beatGoal)
 {
 	int lineCount = (int)::SendMessage(curScint, SCI_GETLINECOUNT, 0, 0);
@@ -68,11 +147,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam
 					if (beat != -1)
 					{
 						// Get the current scintilla
-						int which = -1;
-						::SendMessage(nppData._nppHandle, NPPM_GETCURRENTSCINTILLA, 0, (LPARAM)&which);
-						if (which == -1)
-							return FALSE;
-						HWND curScint = (which == 0)?nppData._scintillaMainHandle:nppData._scintillaSecondHandle;
+						HWND curScint = getScintilla();
 
 						goToLineOfBeat(curScint, beat);
 					}
@@ -84,13 +159,9 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam
 					if (measure != -1)
 					{
 						// Get the current scintilla
-						int which = -1;
-						::SendMessage(nppData._nppHandle, NPPM_GETCURRENTSCINTILLA, 0, (LPARAM)&which);
-						if (which == -1)
-							return FALSE;
-						HWND curScint = (which == 0) ? nppData._scintillaMainHandle : nppData._scintillaSecondHandle;
+						HWND curScint = getScintilla();
 
-						goToLineOfBeat(curScint, measure * 4);
+						goToLineOfMeasure(curScint, measure);
 					}
 					return TRUE;
 				}
