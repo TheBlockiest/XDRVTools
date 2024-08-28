@@ -33,7 +33,7 @@ DemoDlg _navDock;
 
 struct metadataElement {
     string name;
-    string defaultValue;
+    string value;
 };
 
 //
@@ -638,7 +638,7 @@ void metadata(bool smart)
 {
     HWND curScint = getScintilla();
 
-    metadataElement metadataDefaults[] = {
+    metadataElement metadataValues[] = {
         {"MUSIC_TITLE","Song Title"},
         {"ALTERNATE_TITLE",""},
         {"SUBTITLE",""},
@@ -667,6 +667,7 @@ void metadata(bool smart)
         {"DISABLE_LEADERBOARD_UPLOADING","FALSE"},
         {"STAGE_BACKGROUND","default"}
     };
+    int len = sizeof metadataValues / sizeof metadataValues[0] - 1;
 
     if (smart)
     {
@@ -677,7 +678,7 @@ void metadata(bool smart)
     // Find the first line, then delete all previous metadata lines
     int lineCount = (int)::SendMessage(curScint, SCI_GETLINECOUNT, 0, 0);
     int length = 0;
-    for (int i = 1; i <= lineCount; i++)
+    for (int i = 0; i <= lineCount; i++)
     {
         int lineLength = (int)::SendMessage(curScint, SCI_LINELENGTH, i, 0);
         char* currentLine = new char[lineLength + 1];
@@ -689,6 +690,26 @@ void metadata(bool smart)
             delete[] currentLine;
             break;
         }
+        else
+        {
+            string lineAsStr = currentLine;
+            size_t equalPos = lineAsStr.find("=");
+            size_t endLinePos = lineAsStr.find("\n");
+
+            if (equalPos != string::npos && endLinePos != string::npos)
+            {
+                // If equal sign is found, save the value of the metadata to the table
+                // Prevents unnecessary deletion / replacement
+                string tag = lineAsStr.substr(0, equalPos);
+                for (int j = len; j >= 0; j--)
+                {
+                    if (metadataValues[j].name == tag)
+                    {
+                        metadataValues[j].value = lineAsStr.substr(equalPos + 1, endLinePos - equalPos - 1);
+                    }
+                }
+            }
+        }
 
         delete[] currentLine;
     }
@@ -699,10 +720,9 @@ void metadata(bool smart)
     }
     // Generate (sequentially) the metadata lines at the beginning of the code
 
-    int len = sizeof metadataDefaults / sizeof metadataDefaults[0] - 1;
     for (int i = len; i >= 0; i--)
     {
-        string str = metadataDefaults[i].name + "=" + metadataDefaults[i].defaultValue + "\n\
+        string str = metadataValues[i].name + "=" + metadataValues[i].value + "\n\
 ";
         const char* newMetadata = str.c_str();
         ::SendMessage(curScint, SCI_INSERTTEXT, 0, (LPARAM)newMetadata);
