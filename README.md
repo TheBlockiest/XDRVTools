@@ -18,9 +18,9 @@ Current build is guaranteed to work on Windows systems, not yet tested for Linux
 
 ## ❗ Important Info:
 * For ease of use, XDRVTools will expand your selections to cover all of the contained lines or measures as relevant.
-* XDRVTools is only meant to be used with .xdrv files. The behavior of XDRVTools commands on other video chart files is unpredictable.
+* XDRVTools is only meant to be used with .xdrv files. The behavior of XDRVTools commands on other chart files is unpredictable.
 * Caution should be exercised when mirroring hold notes and drifts, as XDRVTools does not automatically mirror unselected note ends / starts.
-* Grave markers are used as an indicator for both event mirroring and beat markers. Therefore, it is highly advised that you avoid using grave markers in elements like checkpoints.
+* Grave markers (`) are used as an indicator for both event mirroring and beat markers. Therefore, it is highly advised that you avoid using grave markers in elements like checkpoints.
 
 
 ## Command List:

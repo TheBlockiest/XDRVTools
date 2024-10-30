@@ -20,7 +20,6 @@
 extern FuncItem funcItem[nbFunc];
 extern NppData nppData;
 
-
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD  reasonForCall, LPVOID /*lpReserved*/)
 {
 	try {
@@ -86,7 +85,7 @@ extern "C" __declspec(dllexport) void beNotified(SCNotification *notifyCode)
 // I will make the messages accessible little by little, according to the need of plugin development.
 // Please let me know if you need to access to some messages :
 // http://sourceforge.net/forum/forum.php?forum_id=482781
-//
+
 extern "C" __declspec(dllexport) LRESULT messageProc(UINT /*Message*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {/*
 	if (Message == WM_MOVE)
